@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Sujalkarale45/Docker-Setup.git'
+            }
+        }
+
+        stage('Setup Environment') {
+            steps {
+                sh '''
+                #!/bin/bash
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh '''
+                #!/bin/bash
+                . venv/bin/activate
+                python src/main.py
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                #!/bin/bash
+                . venv/bin/activate
+                pytest src/test_main.py
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs() // Clean workspace after build
+        }
+    }
+}
